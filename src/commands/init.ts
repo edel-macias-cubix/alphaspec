@@ -6,6 +6,7 @@ import { detectTools, ALL_TOOLS, TOOL_LABELS, type ToolId } from '../lib/detect-
 import { buildTemplateVars, type TemplateVars } from '../lib/templates';
 import { planMigrations } from '../lib/migrations';
 import * as claudeCode from '../lib/ide-writers/claude-code';
+import * as codex from '../lib/ide-writers/codex';
 import * as cursor from '../lib/ide-writers/cursor';
 import * as windsurf from '../lib/ide-writers/windsurf';
 import * as githubCopilot from '../lib/ide-writers/github-copilot';
@@ -14,6 +15,7 @@ import * as universalAgents from '../lib/ide-writers/universal-agents';
 
 const WRITERS: Record<ToolId, { apply: (dir: string, vars?: TemplateVars) => Promise<void>; remove: (dir: string) => Promise<void> }> = {
   'claude-code': claudeCode,
+  'codex': codex,
   'cursor': cursor,
   'windsurf': windsurf,
   'github-copilot': githubCopilot,

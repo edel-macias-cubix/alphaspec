@@ -1,9 +1,8 @@
-import { describe, it, expect, afterEach, beforeAll, vi } from 'vitest';
-import { mkdtemp, rm, readFile, access } from 'node:fs/promises';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
-import { fileURLToPath } from 'node:url';
-import { dirname } from 'node:path';
+import {afterEach, describe, expect, it, vi} from 'vitest';
+import {access, mkdtemp, readFile, rm} from 'node:fs/promises';
+import {dirname, join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {fileURLToPath} from 'node:url';
 
 // Point alphaspec at the source templates for test runs.
 // vitest.config.ts also sets this, but explicit assignment here makes the dependency clear.
@@ -117,6 +116,36 @@ describe('init — claude-code', () => {
   });
 });
 
+describe('init — codex', () => {
+  it('creates .codex/skills/ with a SKILL.md per prompt', async () => {
+    const dir = await freshDir();
+    await runInit({ dir, tools: 'codex', yes: true });
+
+    const slugs = ['create-stories', 'refine-story', 'complete-story', 'implement-story', 'verify-story', 'define-principles', 'bootstrap-from-research'];
+    for (const slug of slugs) {
+      expect(await fileExists(join(dir, '.codex', 'skills', `alphaspec-${slug}`, 'SKILL.md'))).toBe(true);
+    }
+  });
+
+  it('writes Codex skills with prefixed frontmatter names', async () => {
+    const dir = await freshDir();
+    await runInit({ dir, tools: 'codex', yes: true });
+
+    const content = await readFile(join(dir, '.codex', 'skills', 'alphaspec-create-stories', 'SKILL.md'), 'utf-8');
+    expect(content).toContain('name: alphaspec-create-stories');
+    expect(content).not.toContain('name: create-stories');
+  });
+
+  it('also writes shared AGENTS.md workflow instructions', async () => {
+    const dir = await freshDir();
+    await runInit({ dir, tools: 'codex', yes: true });
+
+    const content = await readFile(join(dir, 'AGENTS.md'), 'utf-8');
+    expect(content).toContain('<!-- alphaspec:start -->');
+    expect(content).toContain('alphaspec workflow');
+  });
+});
+
 describe('init — github-copilot', () => {
   it('creates skills (prompt files no longer written)', async () => {
     const dir = await freshDir();
@@ -131,6 +160,21 @@ describe('init — github-copilot', () => {
     const dir = await freshDir();
     await runInit({ dir, tools: 'github-copilot', yes: true });
     expect(await fileExists(join(dir, '.github', 'agents'))).toBe(false);
+  });
+});
+
+describe('remove — codex', () => {
+  it('removes Codex skill folders and cleans AGENTS.md sentinel', async () => {
+    const dir = await freshDir();
+    await runInit({ dir, tools: 'codex', yes: true });
+
+    expect(await fileExists(join(dir, '.codex', 'skills', 'alphaspec-create-stories', 'SKILL.md'))).toBe(true);
+    expect(await fileExists(join(dir, 'AGENTS.md'))).toBe(true);
+
+    await runRemove({ dir, yes: true });
+
+    expect(await fileExists(join(dir, '.codex', 'skills', 'alphaspec-create-stories'))).toBe(false);
+    expect(await fileExists(join(dir, 'AGENTS.md'))).toBe(false);
   });
 });
 

@@ -1,10 +1,11 @@
 import { join } from 'node:path';
 import { pathExists } from './fs-utils';
 
-export type ToolId = 'claude-code' | 'cursor' | 'windsurf' | 'github-copilot' | 'cline';
+export type ToolId = 'claude-code' | 'codex' | 'cursor' | 'windsurf' | 'github-copilot' | 'cline';
 
 export const ALL_TOOLS: readonly ToolId[] = [
   'claude-code',
+  'codex',
   'cursor',
   'windsurf',
   'github-copilot',
@@ -13,6 +14,7 @@ export const ALL_TOOLS: readonly ToolId[] = [
 
 export const TOOL_LABELS: Record<ToolId, string> = {
   'claude-code': 'Claude Code',
+  'codex': 'Codex',
   'cursor': 'Cursor',
   'windsurf': 'Windsurf',
   'github-copilot': 'GitHub Copilot',
@@ -29,6 +31,9 @@ export async function detectTools(dir: string): Promise<ToolId[]> {
 
   if (await anyExists([join(dir, '.claude'), join(dir, 'CLAUDE.md')])) {
     detected.push('claude-code');
+  }
+  if (await anyExists([join(dir, '.codex'), join(dir, 'AGENTS.md')])) {
+    detected.push('codex');
   }
   if (await pathExists(join(dir, '.cursor'))) {
     detected.push('cursor');

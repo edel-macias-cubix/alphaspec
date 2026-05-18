@@ -1,9 +1,10 @@
-import { join, resolve } from 'node:path';
-import { rm, unlink } from 'node:fs/promises';
+import {join, resolve} from 'node:path';
+import {rm} from 'node:fs/promises';
 import * as clack from '@clack/prompts';
-import { readIfExists, pathExists } from '../lib/fs-utils';
-import { ALL_TOOLS, TOOL_LABELS, type ToolId } from '../lib/detect-tools';
+import {readIfExists} from '../lib/fs-utils';
+import {ALL_TOOLS, TOOL_LABELS, type ToolId} from '../lib/detect-tools';
 import * as claudeCode from '../lib/ide-writers/claude-code';
+import * as codex from '../lib/ide-writers/codex';
 import * as cursor from '../lib/ide-writers/cursor';
 import * as windsurf from '../lib/ide-writers/windsurf';
 import * as githubCopilot from '../lib/ide-writers/github-copilot';
@@ -12,6 +13,7 @@ import * as universalAgents from '../lib/ide-writers/universal-agents';
 
 const WRITERS: Record<ToolId, { apply: (dir: string) => Promise<void>; remove: (dir: string) => Promise<void> }> = {
   'claude-code': claudeCode,
+  'codex': codex,
   'cursor': cursor,
   'windsurf': windsurf,
   'github-copilot': githubCopilot,
@@ -38,7 +40,7 @@ export async function runRemove(options: RemoveOptions = {}): Promise<void> {
   if (configRaw) {
     try {
       const config = JSON.parse(configRaw) as { tools?: ToolId[]; storiesDir?: string };
-      configuredTools = config.tools ?? ALL_TOOLS;
+      configuredTools = config.tools ?? [...ALL_TOOLS];
       storiesDir = config.storiesDir ?? '.';
     } catch {
       clack.log.warn('Could not parse .alphaspec/config.json — attempting best-effort removal of all tools.');

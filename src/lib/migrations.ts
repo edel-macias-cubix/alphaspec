@@ -43,6 +43,7 @@ const SLUGS_V0_2_0 = [
  */
 const LEGACY_TOOL_PATHS: Record<ToolId, { kind: 'dir' | 'file'; base: string; ext: string }> = {
   'claude-code':    { kind: 'dir',  base: '.claude/skills',     ext: '' },
+  'codex':          { kind: 'dir',  base: '.codex/skills',      ext: '' },
   'github-copilot': { kind: 'dir',  base: '.github/skills',     ext: '' },
   'cursor':         { kind: 'file', base: '.cursor/commands',   ext: '.md' },
   'windsurf':       { kind: 'file', base: '.windsurf/workflows', ext: '.md' },
